@@ -91,7 +91,7 @@ pub struct Spec {
 }
 
 /// The OpenAPI Specification version.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Version {
     /// Version `3.0.0`.
@@ -587,7 +587,7 @@ pub struct Parameter {
 
 /// There are four possible parameter locations specified by the
 /// [`Parameter::in`] field.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Copy, Clone)]
 #[serde(rename_all = "camelCase")]
 pub enum ParameterLocation {
     /// Used together with Path Templating, where the parameter value is
@@ -824,7 +824,7 @@ pub struct Response {
     /// text representation.
     ///
     /// [CommonMark syntax]: https://spec.commonmark.org
-    pub description: String,
+    pub description: Option<String>,
     /// Maps a header name to its definition. [RFC7230] states header names are
     /// case insensitive. If a response header is defined with the name
     /// `"Content-Type"`, it SHALL be ignored.
@@ -1125,23 +1125,23 @@ pub struct Tag {
 pub struct Reference<T> {
     /// The reference identifier. This MUST be in the form of a URI.
     #[serde(rename = "$ref")]
-    r#ref: Option<String>,
+    pub r#ref: Option<String>,
     /// A short summary which by default SHOULD override that of the
     /// referenced component. If the referenced object-type does not allow a
     /// `summary` field, then this field has no effect.
     #[serde(default)]
-    summary: Option<String>,
+    pub summary: Option<String>,
     /// A description which by default SHOULD override that of the
     /// referenced component. [CommonMark syntax] MAY be used for rich text
     /// representation. If the referenced object-type does not allow a
     /// `description` field, then this field has no effect.
     ///
     /// [CommonMark syntax]: https://spec.commonmark.org
-    #[serde(default)]
-    description: Option<String>,
+    //#[serde(default)]
+    pub description: Option<String>,
     /// Object `T`.
     #[serde(flatten)]
-    object: Option<T>,
+    pub object: Option<T>,
 }
 
 /// The Schema Object allows the definition of input and output data types.
@@ -1180,7 +1180,7 @@ pub struct Schema {
     /// support.
     ///
     /// [URI]: https://datatracker.ietf.org/doc/html/rfc3986
-    #[serde(rename = "$schema", default)]
+    #[serde(rename = "$schema", default, skip_serializing_if = "Option::is_none")]
     pub schema: Option<String>,
     /// The `$id` keyword identifies a schema resource with its canonical [RFC
     /// 6596] URI.
@@ -1190,7 +1190,7 @@ pub struct Schema {
     /// downloadable from its canonical URI.
     ///
     /// [RFC 6596]: https://datatracker.ietf.org/doc/html/rfc6596
-    #[serde(rename = "$id", default)]
+    #[serde(rename = "$id", default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     /// The `$ref` keyword is an applicator that is used to reference a
     /// statically identified schema. Its results are the results of the
@@ -1201,7 +1201,7 @@ pub struct Schema {
     /// the schema to apply. This resolution is safe to perform on schema load,
     /// as the process of evaluating an instance cannot change how the reference
     /// resolves.
-    #[serde(rename = "$ref", default)]
+    #[serde(rename = "$ref", default, skip_serializing_if = "Option::is_none")]
     pub r#ref: Option<String>,
     /// This keyword reserves a location for comments from schema authors to
     /// readers or maintainers of the schema.
@@ -1210,28 +1210,28 @@ pub struct Schema {
     /// editing schemas SHOULD support displaying and editing this keyword. The
     /// value of this keyword MAY be used in debug or error output which is
     /// intended for developers making use of schemas.
-    #[serde(rename = "$comment", default)]
+    #[serde(rename = "$comment", default, skip_serializing_if = "Option::is_none")]
     pub comment: Option<String>,
 
     // JSON Schema Section 10.2.1. Keywords for Applying Subschemas With Logic
     /// An instance validates successfully against this keyword if it validates
     /// successfully against all schemas defined by this keyword's value.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub all_of: Option<Vec<Schema>>,
     /// An instance validates successfully against this keyword if it validates
     /// successfully against at least one schema defined by this keyword's
     /// value. Note that when annotations are being collected, all subschemas
     /// MUST be examined so that annotations are collected from each subschema
     /// that validates successfully.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub any_of: Option<Vec<Schema>>,
     /// An instance validates successfully against this keyword if it validates
     /// successfully against exactly one schema defined by this keyword's value.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub one_of: Option<Vec<Schema>>,
     /// An instance is valid against this keyword if it fails to validate
     /// successfully against the schema defined by this keyword.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub not: Option<Box<Schema>>,
 
     // JSON Schema Section 10.2.2. Keywords for Applying Subschemas
@@ -1247,7 +1247,7 @@ pub struct Schema {
     /// Instances that fail to validate against this keyword's subschema MUST
     /// also be valid against the subschema value of the `else` keyword, if
     /// present.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#if: Option<Box<Schema>>,
     /// When `if` is present, and the instance successfully validates against
     /// its subschema, then validation succeeds against this keyword if the
@@ -1257,7 +1257,7 @@ pub struct Schema {
     /// fails to validate against its subschema. Implementations MUST NOT
     /// evaluate the instance against this keyword, for either validation or
     /// annotation collection purposes, in such cases.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub then: Option<Box<Schema>>,
     /// When `if` is present, and the instance fails to validate against its
     /// subschema, then validation succeeds against this keyword if the instance
@@ -1267,7 +1267,7 @@ pub struct Schema {
     /// successfully validates against its subschema. Implementations MUST NOT
     /// evaluate the instance against this keyword, for either validation or
     /// annotation collection purposes, in such cases.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#else: Option<Box<Schema>>,
     /// This keyword specifies subschemas that are evaluated if the instance is
     /// an object and contains a certain property.
@@ -1277,7 +1277,7 @@ pub struct Schema {
     /// presence of the property.
     ///
     /// Omitting this keyword has the same behavior as an empty object.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
     pub dependent_schemas: HashMap<String, Schema>,
 
     // JSON Schema Section 10.3.1. Keywords for Applying Subschemas to Arrays
@@ -1293,7 +1293,7 @@ pub struct Schema {
     /// `items` and `unevaluated_items`.
     ///
     /// Omitting this keyword has the same assertion behavior as an empty array.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub prefix_items: Vec<Schema>,
     /// This keyword applies its subschema to all instance elements at indexes
     /// greater than the length of the `prefix_iItems` array in the same schema
@@ -1313,7 +1313,7 @@ pub struct Schema {
     /// another way that produces the same effect, such as by directly checking
     /// for the presence and size of a `prefix_items` array. Implementations
     /// that do not support annotation collection MUST do so.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub items: Option<Box<Schema>>,
     /// An array instance is valid against `contains` if at least one of its
     /// elements is valid against the given schema. The subschema MUST be
@@ -1330,7 +1330,7 @@ pub struct Schema {
     /// subschema validates successfully when applied to every index of the
     /// instance. The annotation MUST be present if the instance array to which
     /// this keyword's schema applies is empty.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub contains: Option<Box<Schema>>,
 
     // JSON Schema Section 10.3.2. Keywords for Applying Subschemas to Objects
@@ -1343,7 +1343,7 @@ pub struct Schema {
     ///
     /// Omitting this keyword has the same assertion behavior as an empty
     /// object.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub properties: Option<HashMap<String, Schema>>,
     /// Each property name of this object SHOULD be a valid regular expression,
     /// according to the ECMA-262 regular expression dialect. Each property
@@ -1359,7 +1359,7 @@ pub struct Schema {
     ///
     /// Omitting this keyword has the same assertion behavior as an empty
     /// object.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
     pub pattern_properties: HashMap<String, Schema>,
     /// The behavior of this keyword depends on the presence and annotation
     /// results of `properties` and `pattern_properties` within the same schema
@@ -1381,14 +1381,14 @@ pub struct Schema {
     /// the names in `properties` and the patterns in `pattern_properties`
     /// against the instance property set. Implementations that do not support
     /// annotation collection MUST do so.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub additional_properties: Option<Box<Schema>>,
     /// If the instance is an object, this keyword validates if every property
     /// name in the instance validates against the provided schema. Note the
     /// property name that the schema is testing will always be a string.
     ///
     /// Omitting this keyword has the same behavior as an empty schema.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub property_names: Option<Box<Schema>>,
 
     // JSON Schema Section 11. A Vocabulary for Unevaluated Locations
@@ -1420,7 +1420,7 @@ pub struct Schema {
     ///
     /// Omitting this keyword has the same assertion behavior as an empty
     /// schema.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub unevaluated_items: Option<Box<Schema>>,
     /// The behavior of this keyword depends on the annotation results of
     /// adjacent keywords that apply to the instance location being validated.
@@ -1451,70 +1451,70 @@ pub struct Schema {
     ///
     /// Omitting this keyword has the same assertion behavior as an empty
     /// schema.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub unevaluated_properties: Option<Box<Schema>>,
 
     // JSON Schema Validation Section 6.1. Validation Keywords for Any Instance
     // Type
     /// Data type.
-    #[serde(with = "one_or_array", default)]
+    #[serde(with = "one_or_array", default, skip_serializing_if = "Vec::is_empty")]
     pub r#type: Vec<Type>,
     /// Valid values for this schema.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub r#enum: Vec<String>,
     /// Use of this keyword is functionally equivalent to an [`enum`] with a
     /// single value.
     ///
     /// [`enum`]: Schema::enum
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub r#const: Option<String>,
 
     // JSON Schema Validation Section 6.2. Validation Keywords for Numeric
     // Instances (number and integer)
     /// A numeric instance is valid only if division by this keyword's value
     /// results in an integer.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub multiple_of: Option<f64>,
     /// If the instance is a number, then this keyword validates only if the
     /// instance is less than or exactly equal to `maximum`.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub maximum: Option<f64>,
     /// If the instance is a number, then the instance is valid only if it has a
     /// value strictly less than (not equal to) `exclusiveMaximum`.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub exclusive_maximum: Option<f64>,
     /// If the instance is a number, then this keyword validates only if the
     /// instance is greater than or exactly equal to `minimum`.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub minimum: Option<f64>,
     /// If the instance is a number, then the instance is valid only if it has a
     /// value strictly greater than (not equal to) `exclusiveMinimum`.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub exclusive_minimum: Option<f64>,
 
     // JSON Schema Validation Section 6.3. Validation Keywords for Strings
     /// A string instance is valid against this keyword if its length is less
     /// than, or equal to, the value of this keyword.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_length: Option<usize>,
     /// A string instance is valid against this keyword if its length is greater
     /// than, or equal to, the value of this keyword.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub min_length: Option<usize>,
     /// A string instance is considered valid if the regular expression matches
     /// the instance successfully. Recall: regular expressions are not
     /// implicitly anchored.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pattern: Option<String>,
 
     // JSON Schema Validation Section 6.4. Validation Keywords for Arrays
     /// An array instance is valid against `maxItems` if its size is less than,
     /// or equal to, the value of this keyword.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_items: Option<usize>,
     /// An array instance is valid against `minItems` if its size is greater
     /// than, or equal to, the value of this keyword.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub min_items: Option<usize>,
     /// If this keyword has boolean value false, the instance validates
     /// successfully. If it has boolean value true, the instance validates
@@ -1531,7 +1531,7 @@ pub struct Schema {
     /// `maxContains` value. The second way is if the annotation result is a
     /// boolean `true` and the instance array length is less than or equal to
     /// the `maxContains` value.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_contains: Option<usize>,
     /// If `contains` is not present within the same schema object, then this
     /// keyword has no effect.
@@ -1549,25 +1549,25 @@ pub struct Schema {
     /// `maxContains` causes `contains` to always pass validation.
     ///
     /// Omitting this keyword has the same behavior as a value of 1.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub min_contains: Option<usize>,
 
     // JSON Schema Validation Section 6.5. Validation Keywords for Objects
     /// An object instance is valid against `maxProperties` if its number of
     /// properties is less than, or equal to, the value of this keyword.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_properties: Option<usize>,
     /// An object instance is valid against `minProperties` if its number of
     /// properties is greater than, or equal to, the value of this keyword.
     ///
     /// Omitting this keyword has the same behavior as a value of 0.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub min_properties: Option<usize>,
     /// An object instance is valid against this keyword if every item in the
     /// array is the name of a property in the instance.
     ///
     /// Omitting this keyword has the same behavior as an empty array.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub required: Vec<String>,
     /// This keyword specifies properties that are required if a specific other
     /// property is present. Their requirement is dependent on the presence of
@@ -1578,7 +1578,7 @@ pub struct Schema {
     /// corresponding array is also the name of a property in the instance.
     ///
     /// Omitting this keyword has the same behavior as an empty object.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
     pub dependent_required: HashMap<String, Vec<String>>,
 
     // JSON Schema Validation Section 7. Vocabularies for Semantic Content With
@@ -1587,7 +1587,7 @@ pub struct Schema {
     /// convey semantic information for a fixed subset of values which are
     /// accurately described by authoritative resources, be they RFCs or other
     /// external specifications.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub format: Option<FormatOrString>,
 
     // JSON Schema Validation Section 8. A Vocabulary for the Contents of
@@ -1612,7 +1612,7 @@ pub struct Schema {
     ///
     /// [RFC 4648]: https://datatracker.ietf.org/doc/html/rfc4648
     /// [RFC 2045]: https://datatracker.ietf.org/doc/html/rfc2045
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content_encoding: Option<String>,
     /// If the instance is a string, this property indicates the media type of
     /// the contents of the string. If `content_encoding` is present, this
@@ -1622,7 +1622,7 @@ pub struct Schema {
     /// as defined by [RFC 2046].
     ///
     /// [RFC 2046]: https://datatracker.ietf.org/doc/html/rfc2046
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content_media_type: Option<String>,
     /// If the instance is a string, and if `content_media_type` is present,
     /// this property contains a schema which describes the structure of the
@@ -1633,26 +1633,26 @@ pub struct Schema {
     ///
     /// The value of this property MUST be a valid JSON schema. It SHOULD be
     /// ignored if `content_media_type` is not present.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content_schema: Option<Box<Schema>>,
 
     // JSON Schema Validation Section 9. A Vocabulary for Basic Meta-Data
     // Annotations
     /// A title will preferably be short explanation about the purpose of the
     /// instance described by this schema.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     /// A description will provide explanation about the purpose of the instance
     /// described by this schema. [CommonMark syntax] MAY be used for rich text
     /// representation.
     ///
     /// [CommonMark syntax]: https://spec.commonmark.org
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     /// This keyword can be used to supply a default JSON value associated with
     /// a particular schema. It is RECOMMENDED that a default value be valid
     /// against the associated schema.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub default: Option<Any>,
     /// If `deprecated` has a value of boolean true, it indicates that
     /// applications SHOULD refrain from usage of the declared property. It MAY
@@ -1702,22 +1702,22 @@ pub struct Schema {
     /// Implementations MAY use the value(s) of `default`, if present, as an
     /// additional example. If `examples` is absent, `default` MAY still be used
     /// in this manner.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub examples: Vec<Any>,
 
     // OpenAPI spec extension.
     /// Adds support for polymorphism. The discriminator is an object name that
     /// is used to differentiate between other schemas which may satisfy the
     /// payload description.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub discriminator: Option<Discriminator>,
     /// This MAY be used only on properties schemas. It has no effect on root
     /// schemas. Adds additional metadata to describe the XML representation of
     /// this property.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub xml: Option<Xml>,
     /// Additional external documentation for this schema.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub external_docs: Option<ExternalDocument>,
     /// A free-form property to include an example of an instance for this
     /// schema. To represent examples that cannot be naturally represented in
@@ -1727,11 +1727,11 @@ pub struct Schema {
     /// **Deprecated:** The `example` property has been deprecated in favor of
     /// the JSON Schema `examples` keyword. Use of `example` is discouraged, and
     /// later versions of this specification may remove it.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub example: Option<Any>,
     /// Allows the schema to be extended. The value can be `null`/`None`, a
     /// primitive, an array or an object.
-    #[serde(flatten)]
+    #[serde(flatten, skip_serializing_if = "HashMap::is_empty")]
     pub extensions: HashMap<String, Any>,
 }
 
@@ -1814,7 +1814,7 @@ pub enum Type {
 }
 
 /// Either a known [`Format`] or falls back to a string.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum FormatOrString {
     Format(Format),
@@ -1825,7 +1825,7 @@ pub enum FormatOrString {
 /// the OpenAPI spec.
 ///
 /// [JSON Schema Validation Section 7.3]: https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-00#section-7.3
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Format {
     // JSON Schema Validation Section 7.3.1. Dates, Times, and Duration
