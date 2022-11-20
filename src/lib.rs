@@ -27,7 +27,7 @@ pub use parse::read_from_json_file;
 pub use parse::read_from_yaml_file;
 
 /// This is the root object of the OpenAPI document.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Spec {
     /// This string MUST be the version number of the OpenAPI Specification that
@@ -91,7 +91,7 @@ pub struct Spec {
 }
 
 /// The OpenAPI Specification version.
-#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Version {
     /// Version `3.0.0`.
@@ -115,7 +115,7 @@ pub enum Version {
 ///
 /// The metadata MAY be used by the clients if needed, and MAY be presented in
 /// editing or documentation generation tools for convenience.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Info {
     /// The title of the API.
@@ -145,7 +145,7 @@ pub struct Info {
 }
 
 /// Contact information for the exposed API.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Contact {
     /// The identifying name of the contact person/organization.
@@ -162,7 +162,7 @@ pub struct Contact {
 }
 
 /// License information for the exposed API.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct License {
     /// The license name used for the API.
@@ -180,7 +180,7 @@ pub struct License {
 }
 
 /// An object representing a Server.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Server {
     /// A URL to the target host. This URL supports Server Variables and MAY be
@@ -202,7 +202,7 @@ pub struct Server {
 
 /// An object representing a Server Variable for server URL template
 /// substitution.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ServerVariable {
     /// An enumeration of string values to be used if the substitution options
@@ -229,7 +229,7 @@ pub struct ServerVariable {
 /// All objects defined within the components object will have no effect on the
 /// API unless they are explicitly referenced from properties outside the
 /// components object.
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Clone, Debug, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Components {
     /// An object to hold reusable [Schema Objects].
@@ -307,7 +307,7 @@ pub type Paths = HashMap<String, PathItem>;
 /// A Path Item MAY be empty, due to ACL constraints. The path itself is still
 /// exposed to the documentation viewer but they will not know which operations
 /// and parameters are available.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PathItem {
     /// Allows for a referenced definition of this path item. The referenced
@@ -372,7 +372,7 @@ pub struct PathItem {
 }
 
 /// Describes a single API operation on a path.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Operation {
     /// A list of tags for API documentation control. Tags can be used for
@@ -464,7 +464,7 @@ pub struct Operation {
 }
 
 /// Allows referencing an external resource for extended documentation.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExternalDocument {
     /// A description of the target documentation. [CommonMark syntax] MAY be
@@ -483,7 +483,7 @@ pub struct ExternalDocument {
 ///
 /// [name]: Parameter::name
 /// [location]: Parameter::in
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Parameter {
     /// The name of the parameter. Parameter names are *case sensitive*.
@@ -587,7 +587,7 @@ pub struct Parameter {
 
 /// There are four possible parameter locations specified by the
 /// [`Parameter::in`] field.
-#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Copy, Clone)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum ParameterLocation {
     /// Used together with Path Templating, where the parameter value is
@@ -610,7 +610,7 @@ pub enum ParameterLocation {
 /// Parameter style.
 ///
 /// See [`Parameter::style`].
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ParameterStyle {
     /// Path-style parameters defined by [RFC6570].
@@ -664,7 +664,7 @@ pub enum ParameterStyle {
 }
 
 /// Describes a single request body.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RequestBody {
     /// A brief description of the request body. This could contain examples of
@@ -688,7 +688,7 @@ pub struct RequestBody {
 
 /// Each Media Type Object provides schema and examples for the media type
 /// identified by its key.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaType {
     /// The schema defining the content of the request, response, or parameter.
@@ -717,7 +717,7 @@ pub struct MediaType {
 }
 
 /// A single encoding definition applied to a single schema property.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Encoding {
     /// The Content-Type for encoding a specific property. Default value depends
@@ -792,7 +792,7 @@ pub struct Encoding {
 /// The `Responses Object` MUST contain at least one response code, and if only
 /// one response code is provided it SHOULD be the response for a successful
 /// operation call.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Responses {
     /// The documentation of responses other than the ones declared for specific
@@ -817,7 +817,7 @@ pub struct Responses {
 
 /// Describes a single response from an API Operation, including design-time,
 /// static `links` to operations based on the response.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Response {
     /// A description of the response. [CommonMark syntax] MAY be used for rich
@@ -863,7 +863,7 @@ pub struct Response {
 ///
 /// [Path Item Object]: PathItem
 /// [`webhooks`]: Spec::webhooks
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Callback {
     /// A Path Item Object, or a reference to one, used to define a callback
@@ -878,7 +878,7 @@ pub struct Callback {
 /// schema of its associated value. Tooling implementations MAY choose to
 /// validate compatibility automatically, and reject the example value(s) if
 /// incompatible.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Example {
     /// Short description for the example.
@@ -925,7 +925,7 @@ pub struct Example {
 /// external references.
 ///
 /// [runtime expression]: RuntimeExpression
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Link {
     /// A relative or absolute URI reference to an OAS operation. This field is
@@ -1020,7 +1020,7 @@ pub type RuntimeExpression = String;
 ///
 /// [Parameter Object]: Parameter
 /// [`style`]: Header::style
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Header {
     /// A brief description of the parameter. This could contain examples of
@@ -1077,7 +1077,7 @@ pub struct Header {
 /// Header style.
 ///
 /// See [`Header::style`].
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum HeaderStyle {
     /// Simple style parameters defined by [RFC6570]. This option replaces
@@ -1097,7 +1097,7 @@ pub enum HeaderStyle {
 /// instances.
 ///
 /// [Operation Object]: Operation
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Tag {
     /// The name of the tag.
@@ -1120,7 +1120,7 @@ pub struct Tag {
 /// location of the value being referenced.
 ///
 /// [RFC3986]: https://tools.ietf.org/html/rfc3986
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Reference<T> {
     /// The reference identifier. This MUST be in the form of a URI.
@@ -1162,7 +1162,7 @@ pub struct Reference<T> {
 /// [JSON Schema Specification Draft 2020-12]: https://tools.ietf.org/html/draft-bhutton-json-schema-00
 /// [JSON Schema Core]: https://tools.ietf.org/html/draft-bhutton-json-schema-00
 /// [JSON Schema Validation]: https://tools.ietf.org/html/draft-bhutton-json-schema-validation-00
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Schema {
     // JSON Schema Section 8. The JSON Schema Core Vocabulary
@@ -1801,7 +1801,7 @@ mod one_or_array {
 /// Data type defined by [JSON Schema Validation Section 6.1.1].
 ///
 /// [JSON Schema Validation Section 6.1.1]: https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-00#section-6.1.1
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Type {
     Null,
@@ -1814,7 +1814,7 @@ pub enum Type {
 }
 
 /// Either a known [`Format`] or falls back to a string.
-#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum FormatOrString {
     Format(Format),
@@ -1825,7 +1825,7 @@ pub enum FormatOrString {
 /// the OpenAPI spec.
 ///
 /// [JSON Schema Validation Section 7.3]: https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-00#section-7.3
-#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Format {
     // JSON Schema Validation Section 7.3.1. Dates, Times, and Duration
@@ -1987,7 +1987,7 @@ pub enum Format {
 ///
 /// The discriminator object is legal only when using one of the composite
 /// keywords `oneOf`, `anyOf`, `allOf`.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Discriminator {
     /// The name of the property in the payload that will hold the discriminator
@@ -2005,7 +2005,7 @@ pub struct Discriminator {
 ///
 /// When using arrays, XML element names are *not* inferred (for singular/plural
 /// forms) and the `name` property SHOULD be used to add that information.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Xml {
     /// Replaces the name of the element/attribute used for the described schema
@@ -2053,7 +2053,7 @@ pub struct Xml {
 /// [RFC6749]: https://tools.ietf.org/html/rfc6749
 /// [OpenID Connect Discovery]: https://tools.ietf.org/html/draft-ietf-oauth-discovery-06
 /// [OAuth 2.0 Security Best Current Practice]: https://tools.ietf.org/html/draft-ietf-oauth-security-topics
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SecurityScheme {
     /// The type of the security scheme.
@@ -2107,7 +2107,7 @@ pub struct SecurityScheme {
 }
 
 /// [`SecurityScheme::type`].
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum SecuritySchemeType {
     #[serde(rename = "apiKey")]
     ApiKey,
@@ -2122,7 +2122,7 @@ pub enum SecuritySchemeType {
 }
 
 /// [`SecurityScheme::in`].
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum SecuritySchemeIn {
     #[serde(rename = "query")]
     Query,
@@ -2133,7 +2133,7 @@ pub enum SecuritySchemeIn {
 }
 
 /// Allows configuration of the supported OAuth Flows.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OauthFlows {
     /// Configuration for the OAuth Implicit flow
@@ -2153,7 +2153,7 @@ pub struct OauthFlows {
 }
 
 /// Configuration details for a supported OAuth Flow.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OauthFlow {
     /// The authorization URL to be used for this flow. This MUST be in the form
